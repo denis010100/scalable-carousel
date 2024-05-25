@@ -1,113 +1,153 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import React, { useState, useEffect } from "react"
+import Carousel from "../components/Carousel"
+
+const generateRandomImages = (num: number) => {
+  const images = []
+  for (let i = 1; i <= num; i++) {
+    const width = Math.floor(Math.random() * (1280 - 400 + 1)) + 400
+    const height = Math.floor(Math.random() * (780 - 200 + 1)) + 200
+    images.push(
+      `https://source.unsplash.com/random/${width}x${height}?sig=${i}`
+    )
+  }
+  return images
+}
+
+const CarouselPage = () => {
+  const [numImages, setNumImages] = useState(1001)
+  const [carouselWidth, setCarouselWidth] = useState(getInitialWidth())
+  const [carouselHeight, setCarouselHeight] = useState(getInitialHeight())
+  const [images, setImages] = useState(generateRandomImages(numImages))
+  const [carouselKey, setCarouselKey] = useState(0)
+  const [isAutoResponsive, setIsAutoResponsive] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 720)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 720)
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
+  useEffect(() => {
+    setCarouselKey((prevKey) => prevKey + 1)
+  }, [numImages, carouselWidth, carouselHeight, isAutoResponsive])
+
+  function getInitialWidth() {
+    return window.innerWidth <= 720 ? 300 : 720
+  }
+
+  function getInitialHeight() {
+    return window.innerWidth <= 720 ? 200 : 480
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    if (name === "numImages") {
+      setNumImages(parseInt(value))
+      setImages(generateRandomImages(parseInt(value)))
+    } else if (name === "carouselWidth") {
+      setCarouselWidth(parseInt(value))
+    } else if (name === "carouselHeight") {
+      setCarouselHeight(parseInt(value))
+    }
+  }
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsAutoResponsive(e.target.checked)
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div>
+      <h1 className="text-center text-xl md:text-4xl font-bold my-8 text-gray-800">
+        The Responsive Looping <br /> Supporting Over 1000 Images <br />
+        Carousel
+      </h1>
+      <div className="flex flex-col justify-center gap-4 mb-4">
+        <div className="w-40 m-auto">
+          <label className="block w-full pb-1 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out">
+            Number of Images:
+          </label>
+          <input
+            type="number"
+            name="numImages"
+            value={numImages}
+            onChange={handleInputChange}
+            className="h-10 w-full rounded-md bg-gray-50 px-4 font-thin outline-none drop-shadow-sm transition-all duration-200 ease-in-out focus:bg-white focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
+        <div className="w-40 m-auto">
+          <label className="block w-full pb-1 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out">
+            Carousel Width:
+          </label>
+          <input
+            type="number"
+            name="carouselWidth"
+            value={carouselWidth}
+            onChange={handleInputChange}
+            disabled={isAutoResponsive}
+            className={`bg-gray-${
+              isAutoResponsive ? "400" : "50"
+            } h-10 w-full rounded-md px-4 font-thin outline-none drop-shadow-sm transition-all duration-200 ease-in-out focus:bg-white focus:ring-2 focus:ring-blue-400`}
+          />
+        </div>
+        <div className="w-40 m-auto">
+          <label className="block w-full pb-1 text-sm font-medium text-gray-800 transition-all duration-200 ease-in-out">
+            Carousel Height:
+          </label>
+          <input
+            type="number"
+            name="carouselHeight"
+            value={carouselHeight}
+            onChange={handleInputChange}
+            disabled={isAutoResponsive}
+            className={`bg-gray-${
+              isAutoResponsive ? "400" : "50"
+            } h-10 w-full rounded-md px-4 font-thin outline-none drop-shadow-sm transition-all duration-200 ease-in-out focus:bg-white focus:ring-2 focus:ring-blue-400`}
+          />
+        </div>
+        <div className="flex w-40 m-auto">
+          <label className="block w-full pb-1 text-sm font-medium text-gray-800">
+            Auto-Responsive:
+          </label>
+          <input
+            type="checkbox"
+            name="autoResponsive"
+            checked={isAutoResponsive}
+            onChange={handleCheckboxChange}
+            className="h-5 w-5"
+          />
         </div>
       </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+      <div>
+        <Carousel
+          key={carouselKey}
+          images={images}
+          width={
+            isAutoResponsive
+              ? isMobile
+                ? window.innerWidth
+                : window.innerWidth / 2
+              : carouselWidth
+          }
+          height={
+            isAutoResponsive
+              ? isMobile
+                ? window.innerWidth * (9 / 16)
+                : (window.innerWidth / 2) * (9 / 16)
+              : carouselHeight
+          }
+          isMobile={isMobile}
         />
       </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+    </div>
+  )
 }
+
+export default CarouselPage
